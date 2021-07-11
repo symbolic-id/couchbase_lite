@@ -18,6 +18,7 @@ import 'package:couchbase_lite_example/models/database/beer.dart';
 import 'package:couchbase_lite_example/models/database/brewery.dart';
 import 'package:couchbase_lite_example/widgets/beer_list_item.dart';
 import 'package:couchbase_lite_example/widgets/brewery_list_item.dart';
+import 'package:couchbase_lite_example/data/repository.dart';
 import 'package:flutter/material.dart';
 
 class HomePage extends StatefulWidget {
@@ -74,10 +75,20 @@ class _HomePageState extends State<HomePage> {
             ],
           )),
           drawer: _buildMenu(),
-          floatingActionButton: FloatingActionButton(
-            onPressed: () => _openCreateDialog(),
-            tooltip: 'Create New Beer',
-            child: Icon(Icons.add),
+          floatingActionButton: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              IconButton(
+                onPressed: () => _pageBloc.refetchBeer(),
+                tooltip: 'Refresh',
+                icon: Icon(Icons.refresh),
+              ),
+              FloatingActionButton(
+                onPressed: () => _openCreateDialog(),
+                tooltip: 'Create new',
+                child: Icon(Icons.add),
+              ),
+            ],
           ),
           floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
         ));
@@ -118,17 +129,25 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildBeerContent(
       BuiltMap<int, Beer> beerMap, int itemCount, bool hasReachedEnd) {
-    return ListView.builder(
-        itemCount: itemCount + 1,
-        physics: ClampingScrollPhysics(),
-        itemBuilder: (BuildContext context, int index) {
-          _pageBloc.inIndex.add(index);
-          final beer = beerMap[index];
-          // Display an empty spot at end of list to allow for extra scrolling
-          return hasReachedEnd && beer == null
-              ? ListTile()
-              : Card(child: BeerListItem(beer));
-        });
+    print('LL:: _buildBeerContent()');
+    return RefreshIndicator(
+      onRefresh: () {
+        print('LL:: refresh getBeer ==========');
+        _pageBloc.refetchBeer();
+        return;
+      },
+      child: ListView.builder(
+          itemCount: itemCount + 1,
+          physics: ClampingScrollPhysics(),
+          itemBuilder: (BuildContext context, int index) {
+            _pageBloc.inIndex.add(index);
+            final beer = beerMap[index];
+            // Display an empty spot at end of list to allow for extra scrolling
+            return hasReachedEnd && beer == null
+                ? ListTile()
+                : Card(child: BeerListItem(beer));
+          }),
+    );
   }
 
   Widget _buildBreweryContent(

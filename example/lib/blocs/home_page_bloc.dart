@@ -90,6 +90,11 @@ class HomePageBloc {
     }
   }
 
+  void refetchBeer() {
+    print('LL:: refetch beer ===================');
+    _fetchPage(0);
+  }
+
   void _fetchPage(int pageIndex) {
     currentPage = pageIndex;
 
@@ -104,12 +109,14 @@ class HomePageBloc {
     // Save the observable response so we can properly dispose of it
     switch (_category) {
       case PageCategory.beer:
+        print('LL:: fetch beer ===================');
         _beerResponse =
             Repository.instance.getBeer(perPage * 3, offset, _isDescending);
 
         // If the results change this will propagate the changes to the UI and will
         // also initialize it with the first result set
         _beerResponse.stream.listen((data) {
+          print('LL:: fetch listen data: $data');
           Map<int, Beer> cards = {};
           for (var i = 0; i < data.length; i++) {
             cards[i + offset] = data[i];
@@ -132,7 +139,7 @@ class HomePageBloc {
   }
 
   void createBeer(String name) {
-    // TODO
+    Repository.instance.createBeer(name);
   }
 
   void logout() {

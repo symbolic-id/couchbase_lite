@@ -131,4 +131,8 @@ class Repository {
   ObservableResponse<BuiltList<Beer>> getBeer(
           int limit, int offset, bool isDescending) =>
       _database.getBeer(limit, offset, isDescending);
+
+  void createBeer(String name) {
+    _database.createBeer(name);
+  }
 }

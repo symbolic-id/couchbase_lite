@@ -40,14 +40,15 @@ class AppDatabase {
     try {
       database = await Database.initWithName(dbName);
       // Note wss://10.0.2.2:4984/my-database is for the android simulator on your local machine's couchbase database
-      ReplicatorConfiguration config =
-          ReplicatorConfiguration(database, "ws://10.0.2.2:4984/beer-sample");
+      ReplicatorConfiguration config = ReplicatorConfiguration(
+          database, "ws://192.168.0.115:4984/kalpataru_dev");
       config.replicatorType = ReplicatorType.pushAndPull;
       config.continuous = true;
 
       // Using self signed certificate
       //config.pinnedServerCertificate = "assets/cert-android.cer";
-      config.authenticator = BasicAuthenticator(username, password);
+      // config.authenticator = BasicAuthenticator(username, password);
+      config.authenticator = BasicAuthenticator('admin', "qweasdzxc");
       replicator = Replicator(config);
 
       replicator.addChangeListener((ReplicatorChange event) {
@@ -170,6 +171,14 @@ class AppDatabase {
     };
 
     return _buildObservableQueryResponse(beerMapSubject, query, processResults);
+  }
+
+  void createBeer(String name) async {
+    final id = 'beer_${DateTime.now().millisecondsSinceEpoch}';
+    final mutableDoc = MutableDocument(
+        id: id, data: {'beerID': id, 'type': 'beer', 'name': name});
+    final result = await database.saveDocument(mutableDoc);
+    print('LL:: createBeer result: $result');
   }
 
   Query _buildBeerQuery(int limit, int offset, bool isDescending) {
